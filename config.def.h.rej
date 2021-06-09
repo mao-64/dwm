@@ -1,12 +1,76 @@
 --- config.def.h
 +++ config.def.h
-@@ -101,6 +118,9 @@ static Key keys[] = {
- 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
- 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
- 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
-+	{ MODKEY,            			XK_y,  	   togglescratch,  {.ui = 0 } },
-+	{ MODKEY,            			XK_u,	   togglescratch,  {.ui = 1 } },
-+	{ MODKEY,            			XK_x,	   togglescratch,  {.ui = 2 } },
- 	TAGKEYS(                        XK_1,                      0)
- 	TAGKEYS(                        XK_2,                      1)
- 	TAGKEYS(                        XK_3,                      2)
+@@ -113,3 +113,73 @@ static Button buttons[] = {
+ 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
+ };
+ 
++void
++setlayoutex(const Arg *arg)
++{
++	setlayout(&((Arg) { .v = &layouts[arg->i] }));
++}
++
++void
++viewex(const Arg *arg)
++{
++	view(&((Arg) { .ui = 1 << arg->ui }));
++}
++
++void
++viewall(const Arg *arg)
++{
++	view(&((Arg){.ui = ~0}));
++}
++
++void
++toggleviewex(const Arg *arg)
++{
++	toggleview(&((Arg) { .ui = 1 << arg->ui }));
++}
++
++void
++tagex(const Arg *arg)
++{
++	tag(&((Arg) { .ui = 1 << arg->ui }));
++}
++
++void
++toggletagex(const Arg *arg)
++{
++	toggletag(&((Arg) { .ui = 1 << arg->ui }));
++}
++
++void
++tagall(const Arg *arg)
++{
++	tag(&((Arg){.ui = ~0}));
++}
++
++/* signal definitions */
++/* signum must be greater than 0 */
++/* trigger signals using `xsetroot -name "fsignal:<signame> [<type> <value>]"` */
++static Signal signals[] = {
++	/* signum           function */
++	{ "focusstack",     focusstack },
++	{ "setmfact",       setmfact },
++	{ "togglebar",      togglebar },
++	{ "incnmaster",     incnmaster },
++	{ "togglefloating", togglefloating },
++	{ "focusmon",       focusmon },
++	{ "tagmon",         tagmon },
++	{ "zoom",           zoom },
++	{ "view",           view },
++	{ "viewall",        viewall },
++	{ "viewex",         viewex },
++	{ "toggleview",     view },
++	{ "toggleviewex",   toggleviewex },
++	{ "tag",            tag },
++	{ "tagall",         tagall },
++	{ "tagex",          tagex },
++	{ "toggletag",      tag },
++	{ "toggletagex",    toggletagex },
++	{ "killclient",     killclient },
++	{ "quit",           quit },
++	{ "setlayout",      setlayout },
++	{ "setlayoutex",    setlayoutex },
++};
