@@ -1,32 +1,30 @@
 --- dwm.c
 +++ dwm.c
-@@ -189,16 +164,13 @@ static void pop(Client *);
- static void propertynotify(XEvent *e);
- static void quit(const Arg *arg);
- static Monitor *recttomon(int x, int y, int w, int h);
--static void removesystrayicon(Client *i);
- static void resize(Client *c, int x, int y, int w, int h, int interact);
--static void resizebarwin(Monitor *m);
- static void resizeclient(Client *c, int x, int y, int w, int h);
- static void resizemouse(const Arg *arg);
--static void resizerequest(XEvent *e);
- static void restack(Monitor *m);
- static void run(void);
- static void scan(void);
--static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
-+static int sendevent(Client *c, Atom proto);
- static void sendmon(Client *c, Monitor *m);
- static void setclientstate(Client *c, long state);
- static void setfocus(Client *c);
-@@ -261,10 +227,9 @@ static void (*handler[LASTEvent]) (XEvent *) = {
- 	[MapRequest] = maprequest,
- 	[MotionNotify] = motionnotify,
- 	[PropertyNotify] = propertynotify,
--	[ResizeRequest] = resizerequest,
- 	[UnmapNotify] = unmapnotify
- };
--static Atom wmatom[WMLast], netatom[NetLast], xatom[XLast];
-+static Atom wmatom[WMLast], netatom[NetLast];
- static int running = 1;
- static Cur *cursor[CurLast];
- static Clr **scheme;
+@@ -650,6 +661,7 @@ createmon(void)
+ 	m->nmaster = nmaster;
+ 	m->showbar = showbar;
+ 	m->topbar = topbar;
++	m->bh = bh;
+ 	m->lt[0] = &layouts[0];
+ 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
+ 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
+@@ -1795,9 +1889,18 @@ tile(Monitor *m)
+ void
+ togglebar(const Arg *arg)
+ {
++	/**
++     * Polybar tray does not raise maprequest event. It must be manually scanned
++	 * for. Scanning it too early while the tray is being populated would give
++	 * wrong dimensions.
++     */
++	if (!selmon->traywin)
++		scantray();
++
+ 	selmon->showbar = !selmon->showbar;
+ 	updatebarpos(selmon);
+-	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
++	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, selmon->bh);
++	XMoveResizeWindow(dpy, selmon->traywin, selmon->tx, selmon->by, selmon->tw, selmon->bh);
+ 	arrange(selmon);
+ }
+ 
